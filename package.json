@@ -1,0 +1,14 @@
+{
+  "name": "pagSeguro",
+  "version": "1.0.0",
+  "description": "Implementação da API do PagSeguro em NodeJS",
+  "main": "index.js",
+  "repository": "https://github.com/luismramirezr/pagSeguro.git",
+  "author": "Luis Ramirez <luismramirezr@me.com>",
+  "license": "MIT",
+  "dependencies": {
+    "fast-xml-parser": "^3.12.20",
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.7"
+  }
+}
