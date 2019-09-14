@@ -1,2 +1,3 @@
 # pagSeguro
-Implementação da API do PagSeguro em Node
+
+Implementação da API do PagSeguro Checkout Transparente em NodeJS

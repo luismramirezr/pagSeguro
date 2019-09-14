@@ -1,7 +1,7 @@
-'strict mode';
-const request = require('request-promise-native');
-const parser = require('fast-xml-parser');
-const errorCodes = require('./errorCodes');
+"strict mode";
+const request = require("request-promise-native");
+const parser = require("fast-xml-parser");
+const errorCodes = require("./errorCodes");
 
 class PagSeguro {
   constructor({ email, token, sandbox, sandboxEmail }) {
@@ -10,15 +10,17 @@ class PagSeguro {
     this.sandbox = !!sandbox;
     this.sandboxEmail = sandboxEmail;
 
-    this.currency = 'BRL';
-    this.url = this.sandbox ? 'https://ws.sandbox.pagseguro.uol.com.br/v2' : 'https://ws.pagseguro.uol.com.br/v2';
+    this.currency = "BRL";
+    this.url = this.sandbox
+      ? "https://ws.sandbox.pagseguro.uol.com.br/v2"
+      : "https://ws.pagseguro.uol.com.br/v2";
 
     this.checkoutData = {
       email: this.email,
       token: this.token,
       sandbox: this.sandbox,
       currency: this.currency,
-      url: this.url,
+      url: this.url
     };
 
     this.setPaymentMethod = {
@@ -29,7 +31,7 @@ class PagSeguro {
           creditCardHolderCPF,
           creditCardHolderBirthDate,
           creditCardHolderAreaCode,
-          creditCardHolderPhone,
+          creditCardHolderPhone
         },
         {
           sameAsShipping,
@@ -39,7 +41,7 @@ class PagSeguro {
           billingAddressDistrict,
           billingAddressPostalCode,
           billingAddressCity,
-          billingAddressState,
+          billingAddressState
         },
         { installmentQuantity, installmentValue, noInterestInstallmentQuantity }
       ) => {
@@ -48,16 +50,16 @@ class PagSeguro {
           creditCardHolderCPF,
           creditCardHolderBirthDate,
           creditCardHolderAreaCode,
-          creditCardHolderPhone,
+          creditCardHolderPhone
         };
 
         this.billing = {};
 
         if (sameAsShipping) {
           Object.keys(this.shippingAddress).forEach(key => {
-            if (!['shippingCost', 'shippingType'].includes(key)) {
+            if (!["shippingCost", "shippingType"].includes(key)) {
               const value = this.shippingAddress[key];
-              const prop = key.replace('shipping', 'billing');
+              const prop = key.replace("shipping", "billing");
               this.billing[prop] = value;
             }
           });
@@ -70,14 +72,14 @@ class PagSeguro {
             billingAddressPostalCode,
             billingAddressCity,
             billingAddressState,
-            billingAddressCountry: 'BRA',
+            billingAddressCountry: "BRA"
           };
         }
 
         this.installments = {
           installmentQuantity,
           installmentValue: installmentValue.toFixed(2),
-          noInterestInstallmentQuantity,
+          noInterestInstallmentQuantity
         };
 
         this.clean(this.cardHolder);
@@ -85,30 +87,32 @@ class PagSeguro {
         this.clean(this.installments);
 
         this.paymentMethod = {
-          paymentMode: 'default',
-          paymentMethod: 'creditCard',
+          paymentMode: "default",
+          paymentMethod: "creditCard",
           creditCardToken: card.token,
           ...this.cardHolder,
           ...this.billing,
-          ...this.installments,
+          ...this.installments
         };
 
         this.checkoutData = {
           ...this.checkoutData,
           ...this.paymentMethod,
           ...this.cardHolder,
-          ...this.billing,
+          ...this.billing
         };
 
         return this.paymentMethod;
-      },
+      }
     };
 
     this.items = [];
   }
 
   clean(obj) {
-    return Object.keys(obj).forEach(key => obj[key] === undefined && delete obj[key]);
+    return Object.keys(obj).forEach(
+      key => obj[key] === undefined && delete obj[key]
+    );
   }
 
   async getSession() {
@@ -118,17 +122,25 @@ class PagSeguro {
           url: `${this.url}/sessions`,
           qs: {
             email: this.email,
-            token: this.token,
-          },
+            token: this.token
+          }
         })
         .then(response => {
           return parser.parse(response);
+        })
+        .catch(error => {
+          console.dir(error);
         });
       return { status: true, response };
     } catch (response) {
+      console.dir(response);
       const error = parser.parse(response.error);
       const { code, message } = error.errors.error;
-      return { status: false, message: errorCodes[code], error: { code, message } };
+      return {
+        status: false,
+        message: errorCodes[code],
+        error: { code, message }
+      };
     }
   }
   getSender() {
@@ -161,7 +173,16 @@ class PagSeguro {
     return this.checkoutData;
   }
 
-  setSender({ senderHash, senderName, senderAreaCode, senderPhone, senderEmail, senderCPF, senderCNPJ, senderIp }) {
+  setSender({
+    senderHash,
+    senderName,
+    senderAreaCode,
+    senderPhone,
+    senderEmail,
+    senderCPF,
+    senderCNPJ,
+    senderIp
+  }) {
     this.sender = {
       senderHash,
       senderName,
@@ -170,14 +191,14 @@ class PagSeguro {
       senderEmail: this.sandbox ? this.sandboxEmail : senderEmail,
       senderCPF,
       senderCNPJ,
-      senderIp,
+      senderIp
     };
 
     this.clean(this.sender);
 
     this.checkoutData = {
       ...this.checkoutData,
-      ...this.sender,
+      ...this.sender
     };
     return this.checkoutData;
   }
@@ -192,7 +213,7 @@ class PagSeguro {
     shippingAddressPostalCode,
     shippingAddressComplement,
     shippingCost,
-    shippingType,
+    shippingType
   }) {
     this.shippingAddress = {
       shippingAddressRequired,
@@ -205,7 +226,7 @@ class PagSeguro {
       shippingAddressComplement,
       shippingCost: (shippingCost && shippingCost.toFixed(2)) || undefined,
       shippingType,
-      shippingAddressCountry: 'BRA',
+      shippingAddressCountry: "BRA"
     };
 
     this.clean(this.shippingAddress);
@@ -213,12 +234,12 @@ class PagSeguro {
     if (!this.shippingAddressRequired) {
       this.checkoutData = {
         ...this.checkoutData,
-        shippingAddressRequired,
+        shippingAddressRequired
       };
     } else {
       this.checkoutData = {
         ...this.checkoutData,
-        ...this.shippingAddress,
+        ...this.shippingAddress
       };
     }
 
@@ -243,7 +264,7 @@ class PagSeguro {
     this.items.forEach(item => {
       this.checkoutData = {
         ...this.checkoutData,
-        ...item,
+        ...item
       };
     });
 
@@ -263,7 +284,7 @@ class PagSeguro {
     this.checkoutData = {
       ...this.checkoutData,
       reference,
-      extraAmount: extraAmount && extraAmount.toFixed(2),
+      extraAmount: extraAmount && extraAmount.toFixed(2)
     };
 
     this.clean(this.checkoutData);
@@ -281,9 +302,13 @@ class PagSeguro {
           url: `${this.url}/transactions`,
           qs: {
             email: this.email,
-            token: this.token,
+            token: this.token
           },
-          form: this.checkoutData,
+          headers: {
+            "Content-Type":
+              "application/x-www-form-urlencoded; charset=iso-8859-1"
+          },
+          form: this.checkoutData
         })
         .then(response => {
           return parser.parse(response);
@@ -292,7 +317,11 @@ class PagSeguro {
     } catch (response) {
       const error = parser.parse(response.error);
       const { code, message } = error.errors.error;
-      return { status: false, message: errorCodes[code], error: { code, message } };
+      return {
+        status: false,
+        message: errorCodes[code],
+        error: { code, message }
+      };
     }
   }
 }
