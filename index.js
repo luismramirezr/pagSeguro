@@ -321,11 +321,19 @@ class PagSeguro {
       return { status: true, response };
     } catch (response) {
       const error = parser.parse(response.error);
-      const { code, message } = error.errors.error;
+      const errors = error.errors.error;
+      if (!Array.isArray(errors)) {
+        const { code, message } = errors;
+        return {
+          status: false,
+          message: errorCodes[code],
+          error: { code, message }
+        };
+      }
       return {
         status: false,
-        message: errorCodes[code],
-        error: { code, message }
+        messages: errors.map(({ code }) => errorCodes[code]),
+        errors: errors.map(({ code, message }) => ({ code, message }))
       };
     }
   }
