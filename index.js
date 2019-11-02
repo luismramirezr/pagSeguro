@@ -333,7 +333,7 @@ class PagSeguro {
       return {
         status: false,
         messages: errors.map(({ code }) => errorCodes[code]),
-        errorr: errors.map(({ code, message }) => ({ code, message }))
+        errors: errors.map(({ code, message }) => ({ code, message }))
       };
     }
   }
