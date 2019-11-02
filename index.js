@@ -322,7 +322,7 @@ class PagSeguro {
     } catch (response) {
       const error = parser.parse(response.error);
       const errors = error.errors.error;
-      if (typeof errors === "object") {
+      if (!Array.isArray(errors)) {
         const { code, message } = errors;
         return {
           status: false,
