@@ -280,11 +280,16 @@ class PagSeguro {
     return this.checkoutData;
   }
 
-  async makePayment({ reference, extraAmount }, dryrun, print) {
+  async makePayment(
+    { reference, extraAmount, notificationURL },
+    dryrun,
+    print
+  ) {
     this.checkoutData = {
       ...this.checkoutData,
       reference,
-      extraAmount: extraAmount && extraAmount.toFixed(2)
+      extraAmount: extraAmount && extraAmount.toFixed(2),
+      notificationURL
     };
 
     this.clean(this.checkoutData);
