@@ -128,6 +128,35 @@ class PagSeguro {
     );
   }
 
+  async getTarnsactionFromNotification(notificationCode) {
+    try {
+      const response = await request
+        .get({
+          url: `${this.url}/transactions/notifications/${notificationCode}`,
+          qs: {
+            email: this.email,
+            token: this.token
+          }
+        })
+        .then(response => {
+          return parser.parse(response);
+        })
+        .catch(error => {
+          console.dir(error);
+        });
+      return { status: true, response };
+    } catch (response) {
+      console.dir(response);
+      const error = parser.parse(response.error);
+      const { code, message } = error.errors.error;
+      return {
+        status: false,
+        message: errorCodes[code],
+        error: { code, message }
+      };
+    }
+  }
+
   async getSession() {
     try {
       const response = await request
