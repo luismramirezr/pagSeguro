@@ -24,7 +24,7 @@ class PagSeguro {
     };
 
     this.setPaymentMethod = {
-      creditCard: (
+      creditCard: ([
         { card },
         {
           creditCardHolderName,
@@ -44,7 +44,7 @@ class PagSeguro {
           billingAddressState
         },
         { installmentQuantity, installmentValue, noInterestInstallmentQuantity }
-      ) => {
+      ]) => {
         this.cardHolder = {
           creditCardHolderName,
           creditCardHolderCPF,
@@ -100,6 +100,19 @@ class PagSeguro {
           ...this.paymentMethod,
           ...this.cardHolder,
           ...this.billing
+        };
+
+        return this.paymentMethod;
+      },
+      bankTicket: () => {
+        this.paymentMethod = {
+          paymentMode: "default",
+          paymentMethod: "boleto"
+        };
+
+        this.checkoutData = {
+          ...this.checkoutData,
+          ...this.paymentMethod
         };
 
         return this.paymentMethod;
@@ -204,7 +217,7 @@ class PagSeguro {
   }
 
   setShipping({
-    shippingAddressRequired,
+    shippingAddressRequired = true,
     shippingAddressStreet,
     shippingAddressNumber,
     shippingAddressDistrict,
@@ -231,7 +244,7 @@ class PagSeguro {
 
     this.clean(this.shippingAddress);
 
-    if (!this.shippingAddressRequired) {
+    if (!this.shippingAddress.shippingAddressRequired) {
       this.checkoutData = {
         ...this.checkoutData,
         shippingAddressRequired
@@ -275,7 +288,7 @@ class PagSeguro {
     this.setSender(sender);
     this.setShipping(shipping);
     this.setItems(items);
-    this.setPaymentMethod[payment.method](...payment.params);
+    this.setPaymentMethod[payment.method](payment.params);
 
     return this.checkoutData;
   }
